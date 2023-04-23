@@ -7,7 +7,7 @@ orbs:
   browser-tools: circleci/browser-tools@1.1.0
   aws-cli: circleci/aws-cli@3.1.4
   snyk: snyk/snyk@1.4.0
-  
+
 jobs:
 
   build:
@@ -60,13 +60,13 @@ jobs:
       - snyk/scan:
 
           # Falha o build caso alguma vulnerabilidade seja encontrada
-          fail-on-issues: false
+          fail-on-issues: true
 
           # Falha se encontrar alguma falha nesta severidade
           severity-threshold: high
 
           # Tire uma imagem instantânea das dependências atuais da aplicação para monitoramento contínuo pelo Snyk, se o teste foi bem-sucedido.
-          monitor-on-build: false
+          monitor-on-build: true
 
           # Define o nome desse projeto para o scan
           project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}'
@@ -181,12 +181,14 @@ workflows:
       - deploy-stg:
           requires:
             - test
+            - test_sca
           filters:
             branches:
               ignore: master
       - deploy-prod:
           requires:
             - test
+            - test_sca
           filters:
             branches:
               only: master
