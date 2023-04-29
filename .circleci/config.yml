@@ -308,6 +308,8 @@ workflows:
           requires:
             - test
             - test_sca
+            - pr_test_secrets_scanning
+            - pr_test_sast
           filters:
             branches:
               ignore: master
@@ -315,6 +317,8 @@ workflows:
           requires:
             - test
             - test_sca
+            - test_secrets_scanning
+            - test_sast
           filters:
             branches:
               only: master
