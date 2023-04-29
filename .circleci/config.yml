@@ -357,6 +357,18 @@ workflows:
           filters:
             branches:
               ignore: master
+      - pr_test_dast:
+          requires:
+            - deploy-stg
+          filters:
+            branches:
+              ignore: master
+      - pr_test_api_scan:
+          requires:
+            - deploy-stg
+          filters:
+            branches:
+              ignore: master
       - deploy-prod:
           requires:
             - test
