@@ -40,7 +40,7 @@ jobs:
       - run: sudo npm install -g grunt-cli
       - run: npm run test
 
- # Executa o Software composition Analysis
+  # Executa o Software composition Analysis
   test_sca:
 
     # Variaveis para integrar com Defect Dojo
@@ -78,7 +78,109 @@ jobs:
           # additional-arguments: '--fail-fast --all-projects'
           additional-arguments: '--json-file-output=report.json'
 
+ 
+  test_secrets_scanning:
 
+    docker:
+      - image: trufflesecurity/trufflehog:latest
+
+    environment:
+      APP_NAME: "juice-shop"
+      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
+      SCAN_TYPE: "Trufflehog Scan"
+      REPORT_FILE: "trufflehog-report.json"
+
+    steps:
+      - checkout
+      - run:
+          name: Instalando curl e jq
+          command: apk update && apk add curl jq
+
+      - run:
+          name: "Scan for secrets"
+          # change --since-commit to match your default branch
+          command: trufflehog git file://. --fail --only-verified -j | tee -a trufflehog-report.json | jq
+
+  # Executa o secrets scanning no repositório considerando apenas as modificações pela Branch atual
+  pr_test_secrets_scanning:
+
+    docker:
+      - image: trufflesecurity/trufflehog:latest
+
+    environment:
+      APP_NAME: "juice-shop"
+      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
+      SCAN_TYPE: "Trufflehog Scan"
+      REPORT_FILE: "trufflehog-report.json"
+
+    steps:
+      - checkout
+
+      # Dependência para enviar o relatório para o DefectDOJO
+      - run:
+          name: Instalando curl e jq
+          command: apk update && apk add curl jq
+
+      - run:
+          name: "Scan for secrets"
+          # change --since-commit to match your default branch
+          command: trufflehog git file://. --since-commit master --branch "$CIRCLE_BRANCH" -j | tee -a trufflehog-report.json | jq
+
+  # Configura Semgrep para enviar o resultado do scan para semgrep.dev
+  # Executa Análise estática de código
+  test_sast:
+
+    environment:
+      SEMGREP_RULES: p/default
+      APP_NAME: "juice-shop"
+      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
+      SCAN_TYPE: "Semgrep JSON Report"
+      REPORT_FILE: "semgrep-report.json"
+
+    docker:
+      - image: returntocorp/semgrep
+
+    steps:
+      - checkout
+
+      - run:
+          name: Instalando curl e jq
+          command: apk update && apk add curl jq
+
+      - run:
+          name: "Semgrep scan"
+          # Roda o semgrep falhando o pipeline
+          # command: semgrep ci
+          # Roda o semgrep sem falhar o pipeline
+          command: semgrep ci --json -o semgrep-report.json || true
+
+  # Configura Semgrep para analizar somente as modificações em stand-alone mode
+  pr_test_sast:
+
+    environment:
+      SEMGREP_RULES: p/default
+      # Define com a partir de qual Branch as modificações devem ser consideradas
+      SEMGREP_BASELINE_REF: "origin/master"
+      APP_NAME: "juice-shop"
+      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
+      SCAN_TYPE: "Semgrep JSON Report"
+      REPORT_FILE: "semgrep-report.json"
+
+    docker:
+      - image: returntocorp/semgrep
+
+    steps:
+      - checkout
+
+      - run:
+          name: Instalando curl e jq
+          command: apk update && apk add curl jq
+
+      - run:
+          name: "Semgrep scan"
+          #command: semgrep ci --supply-chain
+          # Roda o semgrep sem falhar o pipeline
+          command: semgrep ci --json -o semgrep-report.json || true
 
   # Publica a aplicação em um ambiente Staging para usar de target do OWASP ZAP
   deploy-stg:
@@ -178,10 +280,36 @@ workflows:
       - test_sca:
           requires:
             - build
+      - test_secrets_scanning:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+      - pr_test_secrets_scanning:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: master
+      - test_sast:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+      - pr_test_sast:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: master                    
       - deploy-stg:
           requires:
             - test
             - test_sca
+            - pr_test_secrets_scanning
+            - pr_test_sast
           filters:
             branches:
               ignore: master
@@ -189,6 +317,8 @@ workflows:
           requires:
             - test
             - test_sca
+            - test_secrets_scanning
+            - test_sast
           filters:
             branches:
               only: master
