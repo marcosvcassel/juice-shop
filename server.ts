@@ -122,6 +122,10 @@ const startupGauge = new client.Gauge({
   labelNames: ['task']
 })
 
+// Teste do secret-scanning
+// aws_access_key_id=AKIA2D67TLRPWU6123EY
+// aws_secret_access_key=6J+bTAn12345678k9xxVj123456789GRZj4GJQzl%
+
 // Wraps the function and measures its (async) execution time
 const collectDurationPromise = (name: string, func: Function) => {
   return async (...args: any) => {

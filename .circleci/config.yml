@@ -268,6 +268,9 @@ jobs:
             aws elasticbeanstalk create-application-version --application-name $EBS_APP_NAME --version-label $CIRCLE_SHA1 --source-bundle S3Bucket=$S3_BUCKET_NAME,S3Key=$EBS_APP_OPTIONS_FILE
             aws elasticbeanstalk update-environment --environment-name $EBS_ENV_NAME --version-label $CIRCLE_SHA1
 
+  # Teste do secret-scanning
+  #aws_access_key_id=AKIA2D5I5LRPWU47ZTEY
+  #aws_secret_access_key=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
 
 workflows:
 
