@@ -1,0 +1,384 @@
+---
+openapi: 3.0.1
+info:
+  title: JuiceShopAPI's
+  description: Securing & Designing API endpoints based on API design security guidelines.
+  contact:
+    email: teste@teste.com
+  version: "1.0"
+  x-audience: company-internal
+servers:
+- url: http://juice-shop-stg-2.us-east-1.elasticbeanstalk.com/
+paths:
+  /api/Users:
+    put:
+      tags:
+      - UserRegistration
+      summary: Update User
+      description: Update a exisitng & registered User
+      security:
+        - BearerAuth: []
+      operationId: put-register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginProperties'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_401'
+    post:
+      tags:
+      - UserRegistration
+      summary: Register
+      description: "(SQL Injection or Data Exposure).\nRegister a User by Email and Password. "
+      security:
+        - BearerAuth: []
+      operationId: register2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginProperties'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+  /api/User/{userId}:
+    get:
+      tags:
+      - UserRegistration
+      summary: User Information
+      security:
+        - BearerAuth: []
+      operationId: getuserbyid
+      parameters:
+      - name: userId
+        in: path
+        description: id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "201":
+          description: Created
+        "401":
+          description: missing or bad authentication
+        "403":
+          description: unauthorized
+  /api/SecurityQuestions/:
+    get:
+      summary: SecurityQuestions
+      operationId: get-securityquestions
+      responses:
+        "200":
+          description: Ok
+  /api/BasketItems:
+    post:
+      tags:
+      - Basket
+      description: |-
+        Broken access Control.
+        Inlcude Items to Basket.
+      security:
+        - BearerAuth: []
+      operationId: itemstobasket
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BasketItemRequest'
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BasketItemRequest'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_401_1'
+  /rest/user/login:
+    post:
+      tags:
+      - Login
+      summary: UserLogin
+      description: "SQL Injection. \nLogin."
+      operationId: userlogin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginCredentials'
+      responses:
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_401_2'
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialsResponse'
+  /rest/products/reviews:
+    patch:
+      tags:
+      - Products
+      summary: Patch Methode to update one attribute of an entitiy
+      description: Update a attribute of entity
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Ok
+        "401":
+          description: missing or bad authentication
+        "403":
+          description: unauthorized
+  /rest/products/{product}/reviews:
+    get:
+      tags:
+      - Products
+      summary: ReviewFromItem
+      description: Get Product Reviews
+      security:
+        - BearerAuth: []
+      operationId: reviewfromitem
+      parameters:
+      - name: product
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Ok
+        "401":
+          description: missing or bad authentication
+        "403":
+          description: unauthorized
+
+   # Token added
+  /rest/products/{productId}/reviews:
+    get:
+      tags:
+      - Products
+      summary: Products
+      description: Update Product Review
+      operationId: put-product-review
+      security:
+        - BearerAuth: []
+      parameters:
+      - name: productId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      requestBody:
+        content:
+          apllication/json:
+            schema:
+              $ref: '#/components/schemas/ReviewRequest'
+      responses:
+        "201":
+          description: Created
+        "401":
+          description: missing or bad authentication
+        "403":
+          description: unauthorized
+
+components:
+  schemas:
+    LoginProperties:
+      required:
+      - email
+      - password
+      - passwordRepeat
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          oneOf:
+          - type: string
+          - type: integer
+          - type: number
+        passwordRepeat:
+          oneOf:
+          - type: string
+          - type: integer
+          - type: number
+        securityQuestion:
+          $ref: '#/components/schemas/LoginProperties_securityQuestion'
+        securityAnswer:
+          type: string
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        deluxePrice:
+          type: number
+        image:
+          type: string
+        createdAt:
+          type: string
+          format: date
+        updatedAt:
+          type: string
+          format: date
+        deletedAt:
+          type: string
+          format: date
+    NotAuthorized:
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+          example: unauthorized.
+    LoginCredentials:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    CredentialsResponse:
+      type: object
+      properties:
+        bid:
+          type: integer
+        email:
+          type: string
+    BasketItemRequest:
+      required:
+      - BasketId
+      - ProductId
+      - quantity
+      type: object
+      properties:
+        ProductId:
+          type: integer
+        BasketId:
+          type: integer
+        quantity:
+          type: integer
+    LoginResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+      additionalProperties: false
+    ReviewRequest:
+      type: object
+      properties:
+        message:
+          type: string
+        author:
+          type: string
+    ResponseForWhoami:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/ResponseForWhoami_user'
+    inline_response_401:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: unauthorized
+    inline_response_400:
+      type: object
+      properties:
+        message:
+          type: string
+      example:
+        message: Validation Error
+    inline_response_401_1:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: Invalid basketId
+    inline_response_401_2:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: Invalid email or password
+    LoginProperties_securityQuestion:
+      type: object
+      properties:
+        id:
+          type: integer
+        question:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    ResponseForWhoami_user:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        lastLoginIp:
+          type: string
+        profileImage:
+          type: string
+  securitySchemes:
+      BearerAuth:
+          type: http
+          scheme: bearer
+          bearerFormat: JWT
