@@ -228,6 +228,47 @@ jobs:
           paths:
             - ./*
 
+  pr_test_dast:
+
+    docker:
+      - image: owasp/zap2docker-stable
+
+    environment:
+      APP_NAME: "juice-shop"
+      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
+      SCAN_TYPE: "ZAP Scan"
+      REPORT_FILE: "/zap/wrk/zap-baseline-scan-report.xml"
+
+    steps:
+      - attach_workspace:
+          at: /zap/wrk
+
+      - run:
+          command: zap-baseline.py -t "http://$(cat /zap/wrk/.zap/env_stg.cname)" -I -c .zap/rules.tsv -x zap-baseline-scan-report
+          no_output_timeout: 1.5h
+            
+  # Configura o Scan de API usando OWASP ZAP - API Scan
+  pr_test_api_scan:
+
+    docker:
+      - image: owasp/zap2docker-stable
+
+    environment:
+      APP_NAME: "juice-shop"
+      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
+      SCAN_TYPE: "ZAP Scan"
+      REPORT_FILE: "/zap/wrk/zap-api-scan-report.xml"
+
+    steps:
+      - attach_workspace:
+          at: /zap/wrk
+
+      - run:
+          command: zap-api-scan.py -t openapi.yml -f openapi -z "-configfile /zap/wrk/.zap/config.prop" -I -x /zap/wrk/zap-api-scan-report.xml
+          no_output_timeout: 1.5h
+
+      - run: pwd && ls -lthr /zap/wrk
+
   deploy-prod:
 
     docker:

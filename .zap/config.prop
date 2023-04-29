@@ -1,0 +1,12 @@
+  -config formhandler.fields.field\\(0\\).fieldId=email \
+  -config formhandler.fields.field\\(0\\).value=test@teste.com \
+  -config formhandler.fields.field\\(0\\).enabled=true \
+  -config formhandler.fields.field\\(1\\).password=phone \
+  -config formhandler.fields.field\\(1\\).value=teste@teste.com \
+  -config formhandler.fields.field\\(1\\).enabled=true \
+  -config replacer.full_list\\(0\\).description=auth1 \
+  -config replacer.full_list\\(0\\).enabled=true \
+  -config replacer.full_list\\(0\\).matchtype=REQ_HEADER \
+  -config replacer.full_list\\(0\\).matchstr=Authorization \
+  -config replacer.full_list\\(0\\).regex=false \
+  -config replacer.full_list\\(0\\).replacement=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdGF0dXMiOiJzdWNjZXNzIiwiZGF0YSI6eyJpZCI6MjEsInVzZXJuYW1lIjoiIiwiZW1haWwiOiJ0ZXN0ZUB0ZXN0ZS5jb20iLCJwYXNzd29yZCI6ImNlMTFmY2U4NzZjOTNlZDVkMmE3MmRhNjYwNDk2NDczIiwicm9sZSI6ImN1c3RvbWVyIiwiZGVsdXhlVG9rZW4iOiIiLCJsYXN0TG9naW5JcCI6InVuZGVmaW5lZCIsInByb2ZpbGVJbWFnZSI6Ii9hc3NldHMvcHVibGljL2ltYWdlcy91cGxvYWRzL2RlZmF1bHQuc3ZnIiwidG90cFNlY3JldCI6IiIsImlzQWN0aXZlIjp0cnVlLCJjcmVhdGVkQXQiOiIyMDIzLTAzLTE0IDA0OjE4OjU3Ljc3MyArMDA6MDAiLCJ1cGRhdGVkQXQiOiIyMDIzLTAzLTE4IDA2OjQwOjA1LjMwOCArMDA6MDAiLCJkZWxldGVkQXQiOm51bGx9LCJpYXQiOjE2NzkxNjg3OTUsImV4cCI6MTY3OTE4Njc5NX0.WFjjifOtPUKkyZs2cK8V_5gEudTtOzv_wan_9lNSJFvZjYdJ8mOqcNKsk0rZdhbOr7JqHxY1hdvoBrZMLLtnD1zg5i9_8KAssPpH_4voB5uSAO9v_J5yeJg47T6-tMyOgixzeBeso4jVpHRQghs3WOGMA4ro88IW6JMB5VscbMk
