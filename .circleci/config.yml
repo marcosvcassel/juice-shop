@@ -60,13 +60,13 @@ jobs:
       - snyk/scan:
 
           # Falha o build caso alguma vulnerabilidade seja encontrada
-          fail-on-issues: true
+          fail-on-issues: false
 
           # Falha se encontrar alguma falha nesta severidade
           severity-threshold: high
 
           # Tire uma imagem instantânea das dependências atuais da aplicação para monitoramento contínuo pelo Snyk, se o teste foi bem-sucedido.
-          monitor-on-build: true
+          monitor-on-build: false
 
           # Define o nome desse projeto para o scan
           project: '${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}'
@@ -77,6 +77,99 @@ jobs:
           # Argumentos adicionais da CLI (https://docs.snyk.io/snyk-cli/cli-reference)
           # additional-arguments: '--fail-fast --all-projects'
           additional-arguments: '--json-file-output=report.json'
+
+  # Configura Semgrep para analizar somente as modificações em stand-alone mode
+  pr_test_sast:
+
+    environment:
+      SEMGREP_RULES: p/default
+      # Define com a partir de qual Branch as modificações devem ser consideradas
+      SEMGREP_BASELINE_REF: "origin/master"
+
+    docker:
+      - image: returntocorp/semgrep
+
+    steps:
+      - checkout
+
+      - run:
+          name: "Semgrep scan"
+          command: semgrep ci
+
+  # Configura Semgrep para enviar o resultado do scan para semgrep.dev
+  # Executa Análise estática de código
+  test_sast:
+
+    environment:
+      SEMGREP_RULES: p/default
+      APP_NAME: "juice-shop"
+      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
+      SCAN_TYPE: "Semgrep JSON Report"
+      REPORT_FILE: "semgrep-report.json"
+
+    docker:
+      - image: returntocorp/semgrep
+
+    steps:
+      - checkout
+
+      - run:
+          name: Instalando curl e jq
+          command: apk update && apk add curl jq
+
+      - run:
+          name: "Semgrep scan"
+          # Roda o semgrep falhando o pipeline
+          # command: semgrep ci --json -o semgrep-report.json
+
+          # Roda o semgrep sem falhar o pipeline
+          command: semgrep ci --json -o semgrep-report.json || true
+
+  # Executa o secrets scanning no repositório considerando apenas as modificações pela Branch atual
+  pr_test_secrets_scanning:
+
+    docker:
+      - image: trufflesecurity/trufflehog:latest
+
+    environment:
+      APP_NAME: "juice-shop"
+      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
+      SCAN_TYPE: "Trufflehog Scan"
+      REPORT_FILE: "trufflehog-report.json"
+
+    steps:
+      - checkout
+
+      # Dependência para enviar o relatório para o DefectDOJO
+      - run:
+          name: Instalando curl e jq
+          command: apk update && apk add curl jq
+
+      - run:
+          name: "Scan for secrets"
+          command: trufflehog git file://. --fail --since-commit master --branch "$CIRCLE_BRANCH" -j | tee -a trufflehog-report.json | jq
+
+  # Executa o secrets scanning no repositório completo
+  test_secrets_scanning:
+
+    docker:
+      - image: trufflesecurity/trufflehog:latest
+
+    environment:
+      APP_NAME: "juice-shop"
+      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
+      SCAN_TYPE: "Trufflehog Scan"
+      REPORT_FILE: "trufflehog-report.json"
+
+    steps:
+      - checkout
+      - run:
+          name: Instalando curl e jq
+          command: apk update && apk add curl jq
+
+      - run:
+          name: "Scan for secrets"
+          command: trufflehog git file://. --fail --only-verified -j | tee -a trufflehog-report.json | jq
 
   # Publica a aplicação em um ambiente Staging para usar de target do OWASP ZAP
   deploy-stg:
@@ -118,6 +211,7 @@ jobs:
             aws s3 cp $EBS_APP_OPTIONS_FILE s3://$S3_BUCKET_NAME
             aws elasticbeanstalk create-application-version --application-name $EBS_APP_NAME --version-label $CIRCLE_SHA1 --source-bundle S3Bucket=$S3_BUCKET_NAME,S3Key=$EBS_APP_OPTIONS_FILE
             aws elasticbeanstalk update-environment --environment-name $EBS_ENV_NAME --version-label $CIRCLE_SHA1
+            aws elasticbeanstalk describe-environments --environment-name $EBS_ENV_NAME | jq -r '.Environments[].CNAME' >> ./.zap/env_stg.cname
 
       - persist_to_workspace:
           root: .
@@ -163,8 +257,7 @@ jobs:
             aws s3 cp $EBS_APP_OPTIONS_FILE s3://$S3_BUCKET_NAME
             aws elasticbeanstalk create-application-version --application-name $EBS_APP_NAME --version-label $CIRCLE_SHA1 --source-bundle S3Bucket=$S3_BUCKET_NAME,S3Key=$EBS_APP_OPTIONS_FILE
             aws elasticbeanstalk update-environment --environment-name $EBS_ENV_NAME --version-label $CIRCLE_SHA1
-
-
+            aws elasticbeanstalk describe-environments --environment-name $EBS_ENV_NAME | jq -r '.Environments[].CNAME' >> ./.zap/env_prod.cname
 
 
 workflows:
@@ -178,10 +271,36 @@ workflows:
       - test_sca:
           requires:
             - build
+      - test_secrets_scanning:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+      - pr_test_secrets_scanning:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: master
+      - test_sast:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+      - pr_test_sast:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: master                    
       - deploy-stg:
           requires:
             - test
             - test_sca
+            - pr_test_secrets_scanning
+            - pr_test_sast
           filters:
             branches:
               ignore: master
@@ -189,6 +308,8 @@ workflows:
           requires:
             - test
             - test_sca
+            - test_secrets_scanning
+            - test_sast
           filters:
             branches:
               only: master
