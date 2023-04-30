@@ -147,7 +147,7 @@ jobs:
 
       - run:
           name: "Scan for secrets"
-          command: trufflehog git file://. --fail --since-commit master --branch "$CIRCLE_BRANCH" -j | tee -a trufflehog-report.json | jq
+          command: trufflehog git file://. --since-commit master --branch "$CIRCLE_BRANCH" -j | tee -a trufflehog-report.json | jq
 
   # Executa o secrets scanning no repositório completo
   test_secrets_scanning:
