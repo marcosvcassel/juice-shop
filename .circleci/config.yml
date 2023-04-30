@@ -180,7 +180,11 @@ jobs:
           name: "Semgrep scan"
           #command: semgrep ci --supply-chain
           # Roda o semgrep sem falhar o pipeline
-          command: semgrep ci --json -o semgrep-report.json || true
+          command: semgrep ci --json -o /tmp/semgrep-report.json || true
+
+      - store_artifacts:
+          path: /tmp/semgrep-report.json
+          destination: semgrep-report.json
 
   # Publica a aplicação em um ambiente Staging para usar de target do OWASP ZAP
   deploy-stg:
