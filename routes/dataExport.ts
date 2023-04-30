@@ -58,7 +58,9 @@ module.exports = function dataExport () {
         })
       })
 
-      db.orders.find({ email: updatedEmail }).then((orders: Array<{  // nosem
+      // Testing if Semgrep will analyze this.
+
+      db.orders.find({ email: updatedEmail }).then((orders: Array<{  
         orderId: string
         totalPrice: number
         products: ProductModel[]

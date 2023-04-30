@@ -150,7 +150,8 @@ jobs:
       - run:
           name: "Semgrep scan"
           # Roda o semgrep falhando o pipeline
-          # command: semgrep ci
+          # command: semgrep ci --json -o semgrep-report.json
+          
           # Roda o semgrep sem falhar o pipeline
           command: semgrep ci --json -o semgrep-report.json || true
 
@@ -161,10 +162,6 @@ jobs:
       SEMGREP_RULES: p/default
       # Define com a partir de qual Branch as modificações devem ser consideradas
       SEMGREP_BASELINE_REF: "origin/master"
-      APP_NAME: "juice-shop"
-      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
-      SCAN_TYPE: "Semgrep JSON Report"
-      REPORT_FILE: "semgrep-report.json"
 
     docker:
       - image: returntocorp/semgrep
@@ -173,14 +170,9 @@ jobs:
       - checkout
 
       - run:
-          name: Instalando curl e jq
-          command: apk update && apk add curl jq
-
-      - run:
           name: "Semgrep scan"
-          #command: semgrep ci --supply-chain
           # Roda o semgrep sem falhar o pipeline
-          command: semgrep ci --json -o /tmp/semgrep-report.json || true
+          command: semgrep ci
 
       - store_artifacts:
           path: /tmp/semgrep-report.json
