@@ -59,6 +59,9 @@ module.exports = function dataExport () {
       })
 
       // Testing if Semgrep will analyze this.
+      // Teste do secret-scanning
+      // aws_access_key_id=AKIA2D5I5LRPWU47ZTEY  # nosem
+      // #aws_secret_access_key=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 # nosem
 
       db.orders.find({ email: updatedEmail }).then((orders: Array<{  
         orderId: string
