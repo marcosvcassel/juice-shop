@@ -221,7 +221,7 @@ jobs:
             aws configure set region us-east-1
             aws s3 cp $EBS_APP_OPTIONS_FILE s3://$S3_BUCKET_NAME
             aws elasticbeanstalk create-application-version --application-name $EBS_APP_NAME --version-label $CIRCLE_SHA1 --source-bundle S3Bucket=$S3_BUCKET_NAME,S3Key=$EBS_APP_OPTIONS_FILE
-            aws elasticbeanstalk update-environment --environment-name $EBS_ENV_NAME --version-label $CIRCLE_SHA1
+            aws elasticbeanstalk update-environment --environment-name $EBS_ENV_NAME --version-label $CIRCLE_SHA1 | jq -r '.Environments[].CNAME' >> ./.zap/env_stg.cname
 
       - persist_to_workspace:
           root: .
@@ -264,7 +264,7 @@ jobs:
           at: /zap/wrk
 
       - run:
-          command: zap-api-scan.py -t openapi.yml -f openapi -z "-configfile /zap/wrk/.zap/config.prop" -I -x /zap/wrk/zap-api-scan-report.xml
+          command: zap-api-scan.py -t /zap/wrk/openapi.yml -f openapi -z "-configfile /zap/wrk/.zap/config.prop" -I -x /zap/wrk/zap-api-scan-report.xml
           no_output_timeout: 1.5h
 
       - run: pwd && ls -lthr /zap/wrk
@@ -307,11 +307,11 @@ jobs:
             aws configure set region us-east-1
             aws s3 cp $EBS_APP_OPTIONS_FILE s3://$S3_BUCKET_NAME
             aws elasticbeanstalk create-application-version --application-name $EBS_APP_NAME --version-label $CIRCLE_SHA1 --source-bundle S3Bucket=$S3_BUCKET_NAME,S3Key=$EBS_APP_OPTIONS_FILE
-            aws elasticbeanstalk update-environment --environment-name $EBS_ENV_NAME --version-label $CIRCLE_SHA1
+            aws elasticbeanstalk update-environment --environment-name $EBS_ENV_NAME --version-label $CIRCLE_SHA1 | jq -r '.Environments[].CNAME' >> ./.zap/env_prod.cname
 
   # Teste do secret-scanning
-  #aws_access_key_id=AKIA2D5I5LRPWU47ZTEY
-  #aws_secret_access_key=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
+  #aws_access_key_id=AKIA2D5I5LRPWU47ZTEY  # nosem
+  #aws_secret_access_key=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 # nosem
 
 workflows:
 
