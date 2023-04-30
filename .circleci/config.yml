@@ -56,12 +56,8 @@ jobs:
 
       - run:
           name: "Semgrep scan"
-          # Roda o semgrep sem falhar o pipeline
           command: semgrep ci
 
-      - store_artifacts:
-          path: /tmp/semgrep-report.json
-          destination: semgrep-report.json
 
   # Configura Semgrep para enviar o resultado do scan para semgrep.dev
   # Executa Análise estática de código
@@ -152,8 +148,9 @@ jobs:
 
       - run:
           name: "Scan for secrets"
-          command: trufflehog git file://. --since-commit master --branch "$CIRCLE_BRANCH" -j | tee -a trufflehog-report.json | jq
+          command: trufflehog git file://. --fail --since-commit master --branch "$CIRCLE_BRANCH" -j | tee -a trufflehog-report.json | jq
 
+  # Executa o secrets scanning no repositótio completo
   test_secrets_scanning:
 
     docker:
