@@ -221,7 +221,8 @@ jobs:
             aws configure set region us-east-1
             aws s3 cp $EBS_APP_OPTIONS_FILE s3://$S3_BUCKET_NAME
             aws elasticbeanstalk create-application-version --application-name $EBS_APP_NAME --version-label $CIRCLE_SHA1 --source-bundle S3Bucket=$S3_BUCKET_NAME,S3Key=$EBS_APP_OPTIONS_FILE
-            aws elasticbeanstalk update-environment --environment-name $EBS_ENV_NAME --version-label $CIRCLE_SHA1 | jq -r '.Environments[].CNAME' >> ./.zap/env_stg.cname
+            aws elasticbeanstalk update-environment --environment-name $EBS_ENV_NAME --version-label $CIRCLE_SHA1
+            aws elasticbeanstalk describe-environments --environment-name $EBS_ENV_NAME | jq -r '.Environments[].CNAME' >> ./.zap/env_stg.cname
 
       - persist_to_workspace:
           root: .
@@ -307,7 +308,8 @@ jobs:
             aws configure set region us-east-1
             aws s3 cp $EBS_APP_OPTIONS_FILE s3://$S3_BUCKET_NAME
             aws elasticbeanstalk create-application-version --application-name $EBS_APP_NAME --version-label $CIRCLE_SHA1 --source-bundle S3Bucket=$S3_BUCKET_NAME,S3Key=$EBS_APP_OPTIONS_FILE
-            aws elasticbeanstalk update-environment --environment-name $EBS_ENV_NAME --version-label $CIRCLE_SHA1 | jq -r '.Environments[].CNAME' >> ./.zap/env_prod.cname
+            aws elasticbeanstalk update-environment --environment-name $EBS_ENV_NAME --version-label $CIRCLE_SHA1
+            aws elasticbeanstalk describe-environments --environment-name $EBS_ENV_NAME | jq -r '.Environments[].CNAME' >> ./.zap/env_prod.cname
 
   # Teste do secret-scanning
   #aws_access_key_id=AKIA2D5I5LRPWU47ZTEY  # nosem
