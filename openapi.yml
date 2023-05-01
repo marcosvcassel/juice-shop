@@ -63,7 +63,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/inline_response_400'
-  /api/User/{userId}:
+  /api/Users/{userId}:
     get:
       tags:
       - UserRegistration
