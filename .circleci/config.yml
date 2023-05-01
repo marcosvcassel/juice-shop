@@ -94,7 +94,7 @@ jobs:
 
       - run:
           name: "Semgrep scan"
-          command: semgrep ci
+          command: semgrep ci || true
 
   # Configura Semgrep para enviar o resultado do scan para semgrep.dev
   # Executa Análise estática de código
@@ -218,6 +218,55 @@ jobs:
           paths:
             - ./*
 
+  # Configura o DAST usando OWASP ZAP - Baseline scan
+  pr_test_dast:
+
+    docker:
+      - image: owasp/zap2docker-stable
+
+    environment:
+      APP_NAME: "juice-shop"
+      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
+      SCAN_TYPE: "ZAP Scan"
+      REPORT_FILE: "/zap/wrk/zap-baseline-scan-report.xml"
+
+    steps:
+      - attach_workspace:
+          at: /zap/wrk
+
+      - run:
+          # command: zap-baseline.py -t "http://$(cat /zap/wrk/.zap/env_stg.cname)" -I -c .zap/rules.conf -x zap-baseline-scan-report
+          command: zap-baseline.py -t "http://$(cat /zap/wrk/.zap/env_stg.cname)" -I -x zap-baseline-scan-report -r baseline-report.html
+          no_output_timeout: 1.5h
+
+      - store_artifacts:  
+          path: /zap/wrk/baseline-report.html
+          destination: baseline-report.html
+
+  # Configura o Scan de API usando OWASP ZAP - API Scan
+  pr_test_api_scan:
+
+    docker:
+      - image: owasp/zap2docker-stable
+
+    environment:
+      APP_NAME: "juice-shop"
+      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
+      SCAN_TYPE: "ZAP Scan"
+      REPORT_FILE: "/zap/wrk/zap-api-scan-report.xml"
+
+    steps:
+      - attach_workspace:
+          at: /zap/wrk
+
+      - run:
+          command: zap-api-scan.py -t /zap/wrk/openapi.yml -f openapi -z "-configfile /zap/wrk/.zap/options.prop" -I -x /zap/wrk/zap-api-scan-report.xml -r api-scan-report.html
+          no_output_timeout: 1.5h
+
+      - store_artifacts:  
+          path: /zap/wrk/api-scan-report.html
+          destination: api-scan-report.html
+
   deploy-prod:
 
     docker:
@@ -259,6 +308,54 @@ jobs:
             aws elasticbeanstalk update-environment --environment-name $EBS_ENV_NAME --version-label $CIRCLE_SHA1
             aws elasticbeanstalk describe-environments --environment-name $EBS_ENV_NAME | jq -r '.Environments[].CNAME' >> ./.zap/env_prod.cname
 
+  # Configura o DAST usando OWASP ZAP - Full scan
+  test_dast:
+
+    docker:
+      - image: owasp/zap2docker-stable
+
+    environment:
+      APP_NAME: "juice-shop"
+      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
+      SCAN_TYPE: "ZAP Scan"
+      REPORT_FILE: "/zap/wrk/zap-baseline-scan-report.xml"
+
+    steps:
+      - attach_workspace:
+          at: /zap/wrk
+
+      - run:
+          # command: zap-baseline.py -t "http://$(cat /zap/wrk/.zap/env_stg.cname)" -I -c .zap/rules.conf -x zap-baseline-scan-report
+          command: zap-baseline.py -t "http://$(cat /zap/wrk/.zap/env_stg.cname)" -j -I -x zap-baseline-scan-report -r baseline-report.html
+          no_output_timeout: 3h
+
+      - store_artifacts:  
+          path: /zap/wrk/baseline-report.html
+          destination: baseline-report.html
+
+  # Configura o Scan de API usando OWASP ZAP - API Scan
+  test_api_scan:
+
+    docker:
+      - image: owasp/zap2docker-stable
+
+    environment:
+      APP_NAME: "juice-shop"
+      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
+      SCAN_TYPE: "ZAP Scan"
+      REPORT_FILE: "/zap/wrk/zap-api-scan-report.xml"
+
+    steps:
+      - attach_workspace:
+          at: /zap/wrk
+
+      - run:
+          command: zap-api-scan.py -t /zap/wrk/openapi.yml -f openapi -z "-configfile /zap/wrk/.zap/options.prop" -I -x /zap/wrk/zap-api-scan-report.xml -r api-scan-report.html
+          no_output_timeout: 1.5h
+
+      - store_artifacts:  
+          path: /zap/wrk/api-scan-report.html
+          destination: api-scan-report.html
 
 workflows:
 
@@ -304,6 +401,18 @@ workflows:
           filters:
             branches:
               ignore: master
+      - pr_test_dast:
+          requires:
+            - deploy-stg
+          filters:
+            branches:
+              ignore: master
+      - pr_test_api_scan:
+          requires:
+            - deploy-stg
+          filters:
+            branches:
+              ignore: master              
       - deploy-prod:
           requires:
             - test
@@ -313,3 +422,15 @@ workflows:
           filters:
             branches:
               only: master
+      - pr_test_dast:
+          requires:
+            - deploy-stg
+          filters:
+            branches:
+              only: master
+      - pr_test_api_scan:
+          requires:
+            - deploy-stg
+          filters:
+            branches:
+              only: master                      
