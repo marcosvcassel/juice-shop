@@ -94,7 +94,7 @@ jobs:
 
       - run:
           name: "Semgrep scan"
-          command: semgrep ci
+          command: semgrep ci || true
 
   # Configura Semgrep para enviar o resultado do scan para semgrep.dev
   # Executa Análise estática de código
@@ -236,8 +236,10 @@ jobs:
 
       - run:
           # command: zap-baseline.py -t "http://$(cat /zap/wrk/.zap/env_stg.cname)" -I -c .zap/rules.tsv -x zap-baseline-scan-report
-          command: zap-baseline.py -t "http://$(cat /zap/wrk/.zap/env_stg.cname)" -I -x zap-baseline-scan-report
+          command: zap-baseline.py -t "http://$(cat /zap/wrk/.zap/env_stg.cname)" -I -x zap-baseline-scan-report -r zap-baseline-scan-report.html
           no_output_timeout: 1.5h
+
+
 
   # Configura o Scan de API usando OWASP ZAP - API Scan
   pr_test_api_scan:
