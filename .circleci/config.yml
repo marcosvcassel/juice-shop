@@ -236,7 +236,7 @@ jobs:
 
       - run:
           # command: zap-baseline.py -t "http://$(cat /zap/wrk/.zap/env_stg.cname)" -I -c .zap/rules.conf -x zap-baseline-scan-report
-          command: zap-baseline.py -t "http://$(cat /zap/wrk/.zap/env_stg.cname)" -I -x zap-baseline-scan-report -r baseline-report.html
+          command: zap-baseline.py -t "http://$(cat /zap/wrk/.zap/env_stg.cname)" -c /zap/wrk/.zap/zap-baseline.conf -I -x zap-baseline-scan-report -r baseline-report.html
           no_output_timeout: 1.5h
 
       - store_artifacts:  
@@ -260,7 +260,7 @@ jobs:
           at: /zap/wrk
 
       - run:
-          command: zap-api-scan.py -t /zap/wrk/openapi.yml -f openapi -z "-configfile /zap/wrk/.zap/options.prop" -I -x /zap/wrk/zap-api-scan-report.xml -r api-scan-report.html
+          command: zap-api-scan.py -t /zap/wrk/openapi.yml -f openapi -z "-configfile /zap/wrk/.zap/options.prop" -c /zap/wrk/.zap/zap-api.conf -I -x /zap/wrk/zap-api-scan-report.xml -r api-scan-report.html
           no_output_timeout: 1.5h
 
       - store_artifacts:  
