@@ -422,13 +422,13 @@ workflows:
           filters:
             branches:
               only: master
-      - pr_test_dast:
+      - test_dast:
           requires:
             - deploy-stg
           filters:
             branches:
               only: master
-      - pr_test_api_scan:
+      - test_api_scan:
           requires:
             - deploy-stg
           filters:
