@@ -366,15 +366,15 @@ jobs:
         - checkout
         - run: ls -la | grep terraform
         - terraform/init:
-          path: terraform
+          path: terraforma
         - terraform/validate:
-          path: terraform
+          path: terraforma
         - terraform/fmt:
-          path: terraform
+          path: terraforma
         - terraform/plan:
-          path: terraform
+          path: terraforma
         - terraform/apply:
-          path: terraform
+          path: terraforma
 
     working_directory: ~/src
 
