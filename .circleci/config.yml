@@ -326,7 +326,7 @@ jobs:
 
       - run:
           # command: zap-baseline.py -t "http://$(cat /zap/wrk/.zap/env_stg.cname)" -I -c .zap/rules.conf -x zap-baseline-scan-report
-          command: zap-baseline.py -t "http://$(cat /zap/wrk/.zap/env_stg.cname)" -j -I -x zap-baseline-scan-report -r baseline-report.html
+          command: zap-baseline.py -t "http://$(cat /zap/wrk/.zap/env_prod.cname)" -j -I -x zap-baseline-scan-report -r baseline-report.html
           no_output_timeout: 3h
 
       - store_artifacts:  
