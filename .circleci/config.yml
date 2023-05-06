@@ -182,10 +182,11 @@ jobs:
           password: $DOCKERHUB_PASSWORD
 
     environment:
-        EBS_ENV_NAME: "juice-shop-env-stg"
-        EBS_APP_NAME: "juice-shop-app-stg"
-        S3_BUCKET_NAME: "juice-shop-env-stg"
+        EBS_ENV_NAME: "juice-shop-ebs-stg"
+        EBS_APP_NAME: "juice-shop-web-stg"
+        S3_BUCKET_NAME: "juice-shop-s3-stg"
         EBS_APP_OPTIONS_FILE: "ebs-app-options.json"
+    
 
     steps:
 
@@ -277,10 +278,12 @@ jobs:
           password: $DOCKERHUB_PASSWORD
 
     environment:
-        EBS_ENV_NAME: "juice-shop-env-prod"
-        EBS_APP_NAME: "juice-shop-app-prod"
-        S3_BUCKET_NAME: "juice-shop-env-prod"
-        EBS_APP_OPTIONS_FILE: "ebs-app-options.json"
+      EBS_ENV_NAME: "juice-shop-ebs-prod"
+      EBS_APP_NAME: "juice-shop-web-prod"
+      S3_BUCKET_NAME: "juice-shop-s3-prod"
+      EBS_APP_OPTIONS_FILE: "ebs-app-options.json"
+
+
 
     steps:
 
