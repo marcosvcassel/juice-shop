@@ -402,7 +402,7 @@ jobs:
       - run:
           name: Scan Terraform with Checkov
           command: |
-            checkov -d ./terraform --output-file-path checkov -o json --framework terraform --soft-fail
+            checkov -d ./terraform --framework terraform --soft-fail -o cli -o json --output-file-path console,$REPORT_FILE
 
 workflows:
 
