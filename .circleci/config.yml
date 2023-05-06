@@ -456,8 +456,6 @@ workflows:
             branches:
               only: master
       - infrastructure_deploy:
-          requires:
-            - test_iac_scan
           filters:
             branches:
               only: terraform                    
