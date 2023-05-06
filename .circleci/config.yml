@@ -357,6 +357,26 @@ jobs:
           path: /zap/wrk/api-scan-report.html
           destination: api-scan-report.html
 
+
+  # Deploy da infra
+  infrastructure_deploy:
+    executor: terraform/default
+    steps:
+        - checkout
+        - terraform/init:
+          path: .
+        - terraform/validate:
+          path: .
+        - terraform/fmt:
+          path: .
+        - terraform/plan:
+          path: .
+        - terraform/apply:
+          path: .
+
+    working_directory: ~/src
+
+
 workflows:
 
   build_test_deploy:
@@ -433,4 +453,10 @@ workflows:
             - deploy-prod
           filters:
             branches:
-              only: master                      
+              only: master
+      - infrastructure_deploy:
+          requires:
+            - test_iac_scan
+          filters:
+            branches:
+              only: terraform                    
