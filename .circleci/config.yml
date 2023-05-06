@@ -424,13 +424,13 @@ workflows:
               only: master
       - test_dast:
           requires:
-            - deploy-stg
+            - deploy-prod
           filters:
             branches:
               only: master
       - test_api_scan:
           requires:
-            - deploy-stg
+            - deploy-prod
           filters:
             branches:
               only: master                      
