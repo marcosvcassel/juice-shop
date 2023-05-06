@@ -361,20 +361,22 @@ jobs:
 
   # Deploy da infra
   infrastructure_deploy:
+    
     executor: terraform/default
+    
     steps:
         - checkout
         - run: ls -la | grep terraform
         - terraform/init
-          #path: terraforma
+            path: terraforma
         - terraform/validate
-          #path: terraforma
+            path: terraforma
         - terraform/fmt
-          #path: terraforma
+            path: terraforma
         - terraform/plan
-          #path: terraforma
+            path: terraforma
         - terraform/apply
-          #path: terraforma
+            path: terraforma
 
     working_directory: ~/src
 
