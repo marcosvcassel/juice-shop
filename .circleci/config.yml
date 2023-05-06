@@ -382,7 +382,7 @@ workflows:
 
   build_test_deploy:
     jobs:
-      - build
+      - build:
           filters:
             branches:
               ignore: branch-7
