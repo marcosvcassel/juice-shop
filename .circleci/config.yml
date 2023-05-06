@@ -364,6 +364,7 @@ jobs:
     executor: terraform/default
     steps:
         - checkout
+        - run: ls -la | grep terraform
         - terraform/init:
           path: terraform/
         - terraform/validate:
