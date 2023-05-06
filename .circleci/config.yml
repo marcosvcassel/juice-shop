@@ -365,16 +365,16 @@ jobs:
     steps:
         - checkout
         - run: ls -la | grep terraform
-        - terraform/init:
-          path: terraforma
-        - terraform/validate:
-          path: terraforma
-        - terraform/fmt:
-          path: terraforma
-        - terraform/plan:
-          path: terraforma
-        - terraform/apply:
-          path: terraforma
+        - terraform/init
+          #path: terraforma
+        - terraform/validate
+          #path: terraforma
+        - terraform/fmt
+          #path: terraforma
+        - terraform/plan
+          #path: terraforma
+        - terraform/apply
+          #path: terraforma
 
     working_directory: ~/src
 
