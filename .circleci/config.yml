@@ -365,15 +365,15 @@ jobs:
     steps:
         - checkout
         - terraform/init:
-          path: .
+          path: ./terraform/
         - terraform/validate:
-          path: .
+          path: ./terraform/
         - terraform/fmt:
-          path: .
+          path: ./terraform/
         - terraform/plan:
-          path: .
+          path: ./terraform/
         - terraform/apply:
-          path: .
+          path: ./terraform/
 
     working_directory: ~/src
 
@@ -383,6 +383,9 @@ workflows:
   build_test_deploy:
     jobs:
       - build
+          filters:
+            branches:
+              ignore: branch-7
       - test:
           requires:
             - build
@@ -458,4 +461,4 @@ workflows:
       - infrastructure_deploy:
           filters:
             branches:
-              only: terraform                    
+              only: branch-7                    
