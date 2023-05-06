@@ -385,10 +385,7 @@ workflows:
 
   build_test_deploy:
     jobs:
-      - build:
-          filters:
-            branches:
-              ignore: branch-7
+      - build
       - test:
           requires:
             - build
@@ -464,4 +461,4 @@ workflows:
       - infrastructure_deploy:
           filters:
             branches:
-              only: branch-7                    
+              only: terraform                   
