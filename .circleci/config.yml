@@ -365,15 +365,15 @@ jobs:
     steps:
         - checkout
         - terraform/init:
-          path: ./terraform/
+          path: terraform/
         - terraform/validate:
-          path: ./terraform/
+          path: terraform/
         - terraform/fmt:
-          path: ./terraform/
+          path: terraform/
         - terraform/plan:
-          path: ./terraform/
+          path: terraform/
         - terraform/apply:
-          path: ./terraform/
+          path: terraform/
 
     working_directory: ~/src
 
