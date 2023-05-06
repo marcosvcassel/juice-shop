@@ -8,6 +8,7 @@ orbs:
   aws-cli: circleci/aws-cli@3.1.4
   snyk: snyk/snyk@1.4.0
   terraform: circleci/terraform@3.1
+  checkov: bridgecrew/checkov@0.0.4
 
 jobs:
 
@@ -283,8 +284,6 @@ jobs:
       S3_BUCKET_NAME: "juice-shop-s3-prod"
       EBS_APP_OPTIONS_FILE: "ebs-app-options.json"
 
-
-
     steps:
 
       - setup_remote_docker:
@@ -383,12 +382,35 @@ jobs:
 
     working_directory: ~/src
 
+  # Configura a análise do código de infraestrutura (terraform) usando checkov
+  test_iac_scan:
+    environment:
+      APP_NAME: "juice-shop"
+      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
+      SCAN_TYPE: "Checkov Scan"
+      REPORT_FILE: "checkov/results_json.json"
+
+    docker:
+      - image: python:3.9
+
+    steps:
+      - checkout
+      - run:
+          name: Install Checkov
+          command: |
+            pip install checkov
+      - run:
+          name: Scan Terraform with Checkov
+          command: |
+            checkov -d ./terraform --output-file-path checkov -o json --framework terraform --soft-fail
 
 workflows:
 
   build_test_deploy:
     jobs:
-      - build
+      - build:
+          filters:
+            ignore: branch-7
       - test:
           requires:
             - build
@@ -461,7 +483,13 @@ workflows:
           filters:
             branches:
               only: master
-      - infrastructure_deploy:
+      - test_iac_scan:
           filters:
             branches:
-              only: terraform                   
+              only: branch-7
+      - infrastructure_deploy:
+          requires:
+            - test_iac_scan
+          filters:
+            branches:
+              only: branch-7                   
