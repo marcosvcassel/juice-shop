@@ -73,14 +73,14 @@ resource "aws_elastic_beanstalk_environment" "juice_shop_prod_env" {
 
   setting {
     namespace = "aws:autoscaling:asg"
-    name = "MinSize"
-    value = "2"
+    name      = "MinSize"
+    value     = "2"
   }
 
   setting {
     namespace = "aws:autoscaling:asg"
-    name = "MaxSize"
-    value = "2"
+    name      = "MaxSize"
+    value     = "2"
   }
 
 }
