@@ -182,9 +182,9 @@ jobs:
           password: $DOCKERHUB_PASSWORD
 
     environment:
-        EBS_ENV_NAME: "juice-shop-env-stg"
-        EBS_APP_NAME: "juice-shop-app-stg"
-        S3_BUCKET_NAME: "juice-shop-env-stg"
+        EBS_ENV_NAME: "juice-shop-ebs-stg"
+        EBS_APP_NAME: "juice-shop-web-stg"
+        S3_BUCKET_NAME: "juice-shop-s3-stg"
         EBS_APP_OPTIONS_FILE: "ebs-app-options.json"
 
     steps:
@@ -268,6 +268,7 @@ jobs:
           path: /zap/wrk/api-scan-report.html
           destination: api-scan-report.html
 
+  # Publica a aplicação em um ambiente de producão
   deploy-prod:
 
     docker:
@@ -277,9 +278,9 @@ jobs:
           password: $DOCKERHUB_PASSWORD
 
     environment:
-        EBS_ENV_NAME: "juice-shop-env-prod"
-        EBS_APP_NAME: "juice-shop-app-prod"
-        S3_BUCKET_NAME: "juice-shop-env-prod"
+        EBS_ENV_NAME: "juice-shop-ebs-prod"
+        EBS_APP_NAME: "juice-shop-web-prod"
+        S3_BUCKET_NAME: "juice-shop-s3-prod"
         EBS_APP_OPTIONS_FILE: "ebs-app-options.json"
 
     steps:
@@ -309,6 +310,11 @@ jobs:
             aws elasticbeanstalk update-environment --environment-name $EBS_ENV_NAME --version-label $CIRCLE_SHA1
             aws elasticbeanstalk describe-environments --environment-name $EBS_ENV_NAME | jq -r '.Environments[].CNAME' >> ./.zap/env_prod.cname
 
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./*
+    
   # Configura o DAST usando OWASP ZAP - Full scan
   test_dast:
 
@@ -357,7 +363,6 @@ jobs:
       - store_artifacts:  
           path: /zap/wrk/api-scan-report.html
           destination: api-scan-report.html
-
 
   # Deploy da infra
   infrastructure_deploy:
