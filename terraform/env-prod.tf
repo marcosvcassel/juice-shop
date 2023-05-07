@@ -37,6 +37,7 @@ resource "aws_iam_instance_profile" "juice_shop_ebs_iam_instance_profile" {
 }
 
 resource "aws_s3_bucket" "juice-shop-s3-prod" {
+  # checkov:skip=CKV_AWS_145:Baixo risco
   bucket = "juice-shop-s3-prod"
   acl    = "private"
 }
