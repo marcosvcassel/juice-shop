@@ -279,7 +279,7 @@ jobs:
 
     environment:
         EBS_ENV_NAME: "juice-shop-ebs-prod"
-        EBS_APP_NAME: "juice-shop-web-stg"
+        EBS_APP_NAME: "juice-shop-web-prod"
         S3_BUCKET_NAME: "juice-shop-s3-stg"
         EBS_APP_OPTIONS_FILE: "ebs-app-options.json"
 
