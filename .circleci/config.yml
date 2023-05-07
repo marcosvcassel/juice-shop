@@ -7,6 +7,7 @@ orbs:
   browser-tools: circleci/browser-tools@1.1.0
   aws-cli: circleci/aws-cli@3.1.4
   snyk: snyk/snyk@1.4.0
+  terraform: circleci/terraform@3.1
 
 jobs:
 
@@ -208,7 +209,7 @@ jobs:
           name: Deploy to Elastic Beanstalk
           command: |
             aws configure set region us-east-1
-            aws s3 cp $EBS_APP_OPTIONS_FILE s3://$S3_BUCKET_NAME
+            aws s3 cp ./terraform/$EBS_APP_OPTIONS_FILE s3://$S3_BUCKET_NAME
             aws elasticbeanstalk create-application-version --application-name $EBS_APP_NAME --version-label $CIRCLE_SHA1 --source-bundle S3Bucket=$S3_BUCKET_NAME,S3Key=$EBS_APP_OPTIONS_FILE
             aws elasticbeanstalk update-environment --environment-name $EBS_ENV_NAME --version-label $CIRCLE_SHA1
             aws elasticbeanstalk describe-environments --environment-name $EBS_ENV_NAME | jq -r '.Environments[].CNAME' >> ./.zap/env_stg.cname
@@ -303,7 +304,7 @@ jobs:
           name: Deploy to Elastic Beanstalk
           command: |
             aws configure set region us-east-1
-            aws s3 cp $EBS_APP_OPTIONS_FILE s3://$S3_BUCKET_NAME
+            aws s3 cp ./terraform/$EBS_APP_OPTIONS_FILE s3://$S3_BUCKET_NAME
             aws elasticbeanstalk create-application-version --application-name $EBS_APP_NAME --version-label $CIRCLE_SHA1 --source-bundle S3Bucket=$S3_BUCKET_NAME,S3Key=$EBS_APP_OPTIONS_FILE
             aws elasticbeanstalk update-environment --environment-name $EBS_ENV_NAME --version-label $CIRCLE_SHA1
             aws elasticbeanstalk describe-environments --environment-name $EBS_ENV_NAME | jq -r '.Environments[].CNAME' >> ./.zap/env_prod.cname
@@ -357,11 +358,36 @@ jobs:
           path: /zap/wrk/api-scan-report.html
           destination: api-scan-report.html
 
+
+  # Deploy da infra
+  infrastructure_deploy:
+    
+    executor: terraform/default
+    
+    steps:
+        - checkout
+        - terraform/init:
+            path: ./terraform
+        - terraform/validate:
+            path: ./terraform
+        - terraform/fmt:
+            path: ./terraform
+        - terraform/plan:
+            path: ./terraform
+        - terraform/apply:
+            path: ./terraform
+
+    working_directory: ~/src
+
+
 workflows:
 
   build_test_deploy:
     jobs:
-      - build
+      - build:
+          filters:
+            branches:
+              ignore: terraform
       - test:
           requires:
             - build
@@ -433,4 +459,8 @@ workflows:
             - deploy-prod
           filters:
             branches:
-              only: master                      
+              only: master
+      - infrastructure_deploy:
+          filters:
+            branches:
+              only: terraform                   
