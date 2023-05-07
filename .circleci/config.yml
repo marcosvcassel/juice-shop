@@ -8,6 +8,7 @@ orbs:
   aws-cli: circleci/aws-cli@3.1.4
   snyk: snyk/snyk@1.4.0
   terraform: circleci/terraform@3.1
+  checkov: bridgecrew/checkov@0.0.4
 
 jobs:
 
@@ -186,7 +187,7 @@ jobs:
         EBS_APP_NAME: "juice-shop-web-stg"
         S3_BUCKET_NAME: "juice-shop-s3-stg"
         EBS_APP_OPTIONS_FILE: "ebs-app-options.json"
-
+    
     steps:
 
       - setup_remote_docker:
@@ -278,10 +279,10 @@ jobs:
           password: $DOCKERHUB_PASSWORD
 
     environment:
-        EBS_ENV_NAME: "juice-shop-ebs-prod"
-        EBS_APP_NAME: "juice-shop-web-prod"
-        S3_BUCKET_NAME: "juice-shop-s3-prod"
-        EBS_APP_OPTIONS_FILE: "ebs-app-options.json"
+      EBS_ENV_NAME: "juice-shop-ebs-prod"
+      EBS_APP_NAME: "juice-shop-web-prod"
+      S3_BUCKET_NAME: "juice-shop-s3-prod"
+      EBS_APP_OPTIONS_FILE: "ebs-app-options.json"
 
     steps:
 
@@ -314,7 +315,7 @@ jobs:
           root: .
           paths:
             - ./*
-    
+
   # Configura o DAST usando OWASP ZAP - Full scan
   test_dast:
 
@@ -385,6 +386,27 @@ jobs:
 
     working_directory: ~/src
 
+  # Configura a análise do código de infraestrutura (terraform) usando checkov
+  test_iac_scan:
+    environment:
+      APP_NAME: "juice-shop"
+      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
+      SCAN_TYPE: "Checkov Scan"
+      REPORT_FILE: "checkov/results_json.json"
+
+    docker:
+      - image: python:3.9
+
+    steps:
+      - checkout
+      - run:
+          name: Install Checkov
+          command: |
+            pip install checkov
+      - run:
+          name: Scan Terraform with Checkov
+          command: |
+            checkov -d ./terraform --framework terraform --soft-fail -o cli -o json --output-file-path console,$REPORT_FILE
 
 workflows:
 
@@ -466,7 +488,13 @@ workflows:
           filters:
             branches:
               only: master
-      - infrastructure_deploy:
+      - test_iac_scan:
           filters:
             branches:
-              only: terraform                   
+              only: terraform
+      - infrastructure_deploy:
+          requires:
+            - test_iac_scan
+          filters:
+            branches:
+              only: terraform                
