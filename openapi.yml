@@ -8,7 +8,7 @@ info:
   version: "1.0"
   x-audience: company-internal
 servers:
-- url: http://juice-shop-env-stg.eba-c2dmgpjn.us-east-1.elasticbeanstalk.com/
+- url: http://juice-shop-web-stg.us-east-1.elasticbeanstalk.com/
 paths:
   /api/Users:
     put:
