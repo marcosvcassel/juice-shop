@@ -181,7 +181,7 @@ jobs:
             -H 'Content-Type: multipart/form-data' \
             -F 'active=true' \
             -F 'verified=false' \
-            -F 'engagement_name=juice-shop-cicd-pipeline' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
             -F 'deduplication_on_engagement=true' \
             -F 'minimum_severity=Info' \
             -F "scan_date=$(date +%Y-%m-%d)" \
@@ -223,7 +223,7 @@ jobs:
             -H 'Content-Type: multipart/form-data' \
             -F 'active=true' \
             -F 'verified=false' \
-            -F 'engagement_name=juice-shop-cicd-pipeline' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
             -F 'deduplication_on_engagement=true' \
             -F 'minimum_severity=Info' \
             -F "scan_date=$(date +%Y-%m-%d)" \
@@ -264,7 +264,7 @@ jobs:
             -H 'Content-Type: multipart/form-data' \
             -F 'active=true' \
             -F 'verified=false' \
-            -F 'engagement_name=juice-shop-cicd-pipeline' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
             -F 'deduplication_on_engagement=true' \
             -F 'minimum_severity=Info' \
             -F "scan_date=$(date +%Y-%m-%d)" \
@@ -351,7 +351,7 @@ jobs:
             -H 'Content-Type: multipart/form-data' \
             -F 'active=true' \
             -F 'verified=false' \
-            -F 'engagement_name=juice-shop-cicd-pipeline' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
             -F 'deduplication_on_engagement=true' \
             -F 'minimum_severity=Info' \
             -F "scan_date=$(date +%Y-%m-%d)" \
@@ -393,7 +393,7 @@ jobs:
             -H 'Content-Type: multipart/form-data' \
             -F 'active=true' \
             -F 'verified=false' \
-            -F 'engagement_name=juice-shop-cicd-pipeline' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
             -F 'deduplication_on_engagement=true' \
             -F 'minimum_severity=Info' \
             -F "scan_date=$(date +%Y-%m-%d)" \
@@ -483,7 +483,7 @@ jobs:
             -H 'Content-Type: multipart/form-data' \
             -F 'active=true' \
             -F 'verified=false' \
-            -F 'engagement_name=juice-shop-cicd-pipeline' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
             -F 'deduplication_on_engagement=true' \
             -F 'minimum_severity=Info' \
             -F "scan_date=$(date +%Y-%m-%d)" \
@@ -525,7 +525,7 @@ jobs:
             -H 'Content-Type: multipart/form-data' \
             -F 'active=true' \
             -F 'verified=false' \
-            -F 'engagement_name=juice-shop-cicd-pipeline' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
             -F 'deduplication_on_engagement=true' \
             -F 'minimum_severity=Info' \
             -F "scan_date=$(date +%Y-%m-%d)" \
@@ -590,7 +590,7 @@ jobs:
             -H 'Content-Type: multipart/form-data' \
             -F 'active=true' \
             -F 'verified=false' \
-            -F 'engagement_name=juice-shop-cicd-pipeline' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
             -F 'deduplication_on_engagement=true' \
             -F 'minimum_severity=Info' \
             -F "scan_date=$(date +%Y-%m-%d)" \
