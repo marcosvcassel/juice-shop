@@ -125,6 +125,7 @@ jobs:
           name: "Semgrep scan"
           command: semgrep ci --json -o semgrep-report.json || true
 
+
       - run:
           name: Upload the Semgrep results to DefectDojo
           command: |
