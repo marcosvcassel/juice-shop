@@ -47,7 +47,7 @@ jobs:
 
     # Variaveis para integrar com Defect Dojo
     environment:
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "Snyk Scan"
       REPORT_FILE: "report.json"
@@ -150,7 +150,7 @@ jobs:
 
     environment:
       SEMGREP_RULES: p/default
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "Semgrep JSON Report"
       REPORT_FILE: "semgrep-report.json"
@@ -198,7 +198,7 @@ jobs:
       - image: trufflesecurity/trufflehog:latest
 
     environment:
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "Trufflehog Scan"
       REPORT_FILE: "trufflehog-report.json"
@@ -241,7 +241,7 @@ jobs:
       - image: trufflesecurity/trufflehog:latest
 
     environment:
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "Trufflehog Scan"
       REPORT_FILE: "trufflehog-report.json"
@@ -329,7 +329,7 @@ jobs:
       - image: owasp/zap2docker-stable
 
     environment:
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "ZAP Scan"
       REPORT_FILE: "/zap/wrk/zap-baseline-scan-report.xml"
@@ -372,7 +372,7 @@ jobs:
       - image: owasp/zap2docker-stable
 
     environment:
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "ZAP Scan"
       REPORT_FILE: "/zap/wrk/zap-api-scan-report.xml"
@@ -461,7 +461,7 @@ jobs:
       - image: owasp/zap2docker-stable
 
     environment:
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "ZAP Scan"
       REPORT_FILE: "/zap/wrk/zap-baseline-scan-report.xml"
@@ -504,7 +504,7 @@ jobs:
       - image: owasp/zap2docker-stable
 
     environment:
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "ZAP Scan"
       REPORT_FILE: "/zap/wrk/zap-api-scan-report.xml"
@@ -563,7 +563,7 @@ jobs:
   # Configura a análise do código de infraestrutura (terraform) usando checkov
   test_iac_scan:
     environment:
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "Checkov Scan"
       REPORT_FILE: "checkov/results_json.json"
