@@ -106,7 +106,7 @@ jobs:
       SEMGREP_RULES: p/default
       # Define com a partir de qual Branch as modificações devem ser consideradas
       SEMGREP_BASELINE_REF: "origin/master"
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "Semgrep JSON Report"
       REPORT_FILE: "semgrep-report.json"
