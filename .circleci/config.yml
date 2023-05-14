@@ -47,7 +47,7 @@ jobs:
 
     # Variaveis para integrar com Defect Dojo
     environment:
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "Snyk Scan"
       REPORT_FILE: "report.json"
@@ -80,6 +80,25 @@ jobs:
           # additional-arguments: '--fail-fast --all-projects'
           additional-arguments: '--json-file-output=report.json'
 
+      - run:
+          name: Upload the Snyk results to DefectDojo
+          command: |
+            curl -X 'POST' $DEFECT_DOJO_API_URL \
+            -H 'accept: application/json' \
+            -H "Authorization: $DEFECTDOJO_API_TOKEN" \
+            -H 'Content-Type: multipart/form-data' \
+            -F 'active=true' \
+            -F 'verified=false' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
+            -F 'deduplication_on_engagement=true' \
+            -F 'minimum_severity=Info' \
+            -F "scan_date=$(date +%Y-%m-%d)" \
+            -F "product_name=$APP_NAME" \
+            -F "file=@$REPORT_FILE;type=application/json" \
+            -F 'auto_create_context=true' \
+            -F "scan_type=$SCAN_TYPE" | jq > snyk-report.html
+
+
   # Configura Semgrep para analizar somente as modificações em stand-alone mode
   pr_test_sast:
 
@@ -87,6 +106,10 @@ jobs:
       SEMGREP_RULES: p/default
       # Define com a partir de qual Branch as modificações devem ser consideradas
       SEMGREP_BASELINE_REF: "origin/master"
+      APP_NAME: "Juice-shop 2"
+      DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
+      SCAN_TYPE: "Semgrep JSON Report"
+      REPORT_FILE: "semgrep-report.json"
 
     docker:
       - image: returntocorp/semgrep
@@ -95,16 +118,39 @@ jobs:
       - checkout
 
       - run:
-          name: "Semgrep scan"
-          command: semgrep ci || true
+          name: Instalando curl e jq
+          command: apk update && apk add curl jq      
 
+      - run:
+          name: "Semgrep scan"
+          command: semgrep ci --json -o semgrep-report.json || true
+
+
+      - run:
+          name: Upload the Semgrep results to DefectDojo
+          command: |
+            curl -X 'POST' $DEFECT_DOJO_API_URL \
+            -H 'accept: application/json' \
+            -H "Authorization: $DEFECTDOJO_API_TOKEN" \
+            -H 'Content-Type: multipart/form-data' \
+            -F 'active=true' \
+            -F 'verified=false' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
+            -F 'deduplication_on_engagement=true' \
+            -F 'minimum_severity=Info' \
+            -F "scan_date=$(date +%Y-%m-%d)" \
+            -F "product_name=$APP_NAME" \
+            -F "file=@$REPORT_FILE;type=application/json" \
+            -F 'auto_create_context=TRUE' \
+            -F "scan_type=$SCAN_TYPE" | jq
+  
   # Configura Semgrep para enviar o resultado do scan para semgrep.dev
   # Executa Análise estática de código
   test_sast:
 
     environment:
       SEMGREP_RULES: p/default
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "Semgrep JSON Report"
       REPORT_FILE: "semgrep-report.json"
@@ -127,6 +173,24 @@ jobs:
           # Roda o semgrep sem falhar o pipeline
           command: semgrep ci --json -o semgrep-report.json || true
 
+      - run:
+          name: Upload the Semgrep results to DefectDojo
+          command: |
+            curl -X 'POST' $DEFECT_DOJO_API_URL \
+            -H 'accept: application/json' \
+            -H "Authorization: $DEFECTDOJO_API_TOKEN" \
+            -H 'Content-Type: multipart/form-data' \
+            -F 'active=true' \
+            -F 'verified=false' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
+            -F 'deduplication_on_engagement=true' \
+            -F 'minimum_severity=Info' \
+            -F "scan_date=$(date +%Y-%m-%d)" \
+            -F "product_name=$APP_NAME" \
+            -F "file=@$REPORT_FILE;type=application/json" \
+            -F 'auto_create_context=TRUE' \
+            -F "scan_type=$SCAN_TYPE" | jq
+
   # Executa o secrets scanning no repositório considerando apenas as modificações pela Branch atual
   pr_test_secrets_scanning:
 
@@ -134,7 +198,7 @@ jobs:
       - image: trufflesecurity/trufflehog:latest
 
     environment:
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "Trufflehog Scan"
       REPORT_FILE: "trufflehog-report.json"
@@ -151,6 +215,25 @@ jobs:
           name: "Scan for secrets"
           command: trufflehog git file://. --since-commit master --branch "$CIRCLE_BRANCH" -j | tee -a trufflehog-report.json | jq
 
+      - run:
+          name: Upload the TruffleHog (secrets scanning) results to DefectDojo
+          command: |
+            curl -X 'POST' $DEFECT_DOJO_API_URL \
+            -H 'accept: application/json' \
+            -H "Authorization: $DEFECTDOJO_API_TOKEN" \
+            -H 'Content-Type: multipart/form-data' \
+            -F 'active=true' \
+            -F 'verified=false' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
+            -F 'deduplication_on_engagement=true' \
+            -F 'minimum_severity=Info' \
+            -F "scan_date=$(date +%Y-%m-%d)" \
+            -F "product_name=$APP_NAME" \
+            -F "file=@$REPORT_FILE;type=application/json" \
+            -F 'auto_create_context=TRUE' \
+            -F "scan_type=$SCAN_TYPE" | jq
+
+
   # Executa o secrets scanning no repositório completo
   test_secrets_scanning:
 
@@ -158,7 +241,7 @@ jobs:
       - image: trufflesecurity/trufflehog:latest
 
     environment:
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "Trufflehog Scan"
       REPORT_FILE: "trufflehog-report.json"
@@ -172,6 +255,25 @@ jobs:
       - run:
           name: "Scan for secrets"
           command: trufflehog git file://. --fail --only-verified -j | tee -a trufflehog-report.json | jq
+
+      - run:
+          name: Upload the TruffleHog (secrets scanning) results to DefectDojo
+          command: |
+            curl -X 'POST' $DEFECT_DOJO_API_URL \
+            -H 'accept: application/json' \
+            -H "Authorization: $DEFECTDOJO_API_TOKEN" \
+            -H 'Content-Type: multipart/form-data' \
+            -F 'active=true' \
+            -F 'verified=false' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
+            -F 'deduplication_on_engagement=true' \
+            -F 'minimum_severity=Info' \
+            -F "scan_date=$(date +%Y-%m-%d)" \
+            -F "product_name=$APP_NAME" \
+            -F "file=@$REPORT_FILE;type=application/json" \
+            -F 'auto_create_context=TRUE' \
+            -F "scan_type=$SCAN_TYPE" | jq
+
 
   # Publica a aplicação em um ambiente Staging para usar de target do OWASP ZAP
   deploy-stg:
@@ -227,7 +329,7 @@ jobs:
       - image: owasp/zap2docker-stable
 
     environment:
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "ZAP Scan"
       REPORT_FILE: "/zap/wrk/zap-baseline-scan-report.xml"
@@ -241,6 +343,24 @@ jobs:
           command: zap-baseline.py -t "http://$(cat /zap/wrk/.zap/env_stg.cname)" -c /zap/wrk/.zap/zap-baseline.conf -I -x zap-baseline-scan-report -r baseline-report.html
           no_output_timeout: 1.5h
 
+      - run:
+          name: Upload the ZAP Baseline Scan results to DefectDojo
+          command: |
+            curl -X 'POST' $DEFECT_DOJO_API_URL \
+            -H 'accept: application/json' \
+            -H "Authorization: $DEFECTDOJO_API_TOKEN" \
+            -H 'Content-Type: multipart/form-data' \
+            -F 'active=true' \
+            -F 'verified=false' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
+            -F 'deduplication_on_engagement=true' \
+            -F 'minimum_severity=Info' \
+            -F "scan_date=$(date +%Y-%m-%d)" \
+            -F "product_name=$APP_NAME" \
+            -F "file=@$REPORT_FILE;type=text/xml" \
+            -F 'auto_create_context=TRUE' \
+            -F "scan_type=$SCAN_TYPE"
+
       - store_artifacts:  
           path: /zap/wrk/baseline-report.html
           destination: baseline-report.html
@@ -252,7 +372,7 @@ jobs:
       - image: owasp/zap2docker-stable
 
     environment:
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "ZAP Scan"
       REPORT_FILE: "/zap/wrk/zap-api-scan-report.xml"
@@ -264,6 +384,24 @@ jobs:
       - run:
           command: zap-api-scan.py -t /zap/wrk/openapi.yml -f openapi -z "-configfile /zap/wrk/.zap/options.prop" -c /zap/wrk/.zap/zap-api.conf -I -x /zap/wrk/zap-api-scan-report.xml -r api-scan-report.html
           no_output_timeout: 1.5h
+
+      - run:
+          name: Upload the ZAP Api Scan results to DefectDojo
+          command: |
+            curl -X 'POST' $DEFECT_DOJO_API_URL \
+            -H 'accept: application/json' \
+            -H "Authorization: $DEFECTDOJO_API_TOKEN" \
+            -H 'Content-Type: multipart/form-data' \
+            -F 'active=true' \
+            -F 'verified=false' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
+            -F 'deduplication_on_engagement=true' \
+            -F 'minimum_severity=Info' \
+            -F "scan_date=$(date +%Y-%m-%d)" \
+            -F "product_name=$APP_NAME" \
+            -F "file=@$REPORT_FILE;type=text/xml" \
+            -F 'auto_create_context=TRUE' \
+            -F "scan_type=$SCAN_TYPE"
 
       - store_artifacts:  
           path: /zap/wrk/api-scan-report.html
@@ -323,7 +461,7 @@ jobs:
       - image: owasp/zap2docker-stable
 
     environment:
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "ZAP Scan"
       REPORT_FILE: "/zap/wrk/zap-baseline-scan-report.xml"
@@ -337,6 +475,24 @@ jobs:
           command: zap-baseline.py -t "http://$(cat /zap/wrk/.zap/env_prod.cname)" -j -I -x zap-baseline-scan-report -r baseline-report.html
           no_output_timeout: 3h
 
+      - run:
+          name: Upload the ZAP Baseline Scan results to DefectDojo
+          command: |
+            curl -X 'POST' $DEFECT_DOJO_API_URL \
+            -H 'accept: application/json' \
+            -H "Authorization: $DEFECTDOJO_API_TOKEN" \
+            -H 'Content-Type: multipart/form-data' \
+            -F 'active=true' \
+            -F 'verified=false' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
+            -F 'deduplication_on_engagement=true' \
+            -F 'minimum_severity=Info' \
+            -F "scan_date=$(date +%Y-%m-%d)" \
+            -F "product_name=$APP_NAME" \
+            -F "file=@$REPORT_FILE;type=text/xml" \
+            -F 'auto_create_context=TRUE' \
+            -F "scan_type=$SCAN_TYPE"
+
       - store_artifacts:  
           path: /zap/wrk/baseline-report.html
           destination: baseline-report.html
@@ -348,7 +504,7 @@ jobs:
       - image: owasp/zap2docker-stable
 
     environment:
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "ZAP Scan"
       REPORT_FILE: "/zap/wrk/zap-api-scan-report.xml"
@@ -360,6 +516,24 @@ jobs:
       - run:
           command: zap-api-scan.py -t /zap/wrk/openapi.yml -f openapi -z "-configfile /zap/wrk/.zap/options.prop" -I -x /zap/wrk/zap-api-scan-report.xml -r api-scan-report.html
           no_output_timeout: 1.5h
+
+      - run:
+          name: Upload the ZAP Api Scan results to DefectDojo
+          command: |
+            curl -X 'POST' $DEFECT_DOJO_API_URL \
+            -H 'accept: application/json' \
+            -H "Authorization: $DEFECTDOJO_API_TOKEN" \
+            -H 'Content-Type: multipart/form-data' \
+            -F 'active=true' \
+            -F 'verified=false' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
+            -F 'deduplication_on_engagement=true' \
+            -F 'minimum_severity=Info' \
+            -F "scan_date=$(date +%Y-%m-%d)" \
+            -F "product_name=$APP_NAME" \
+            -F "file=@$REPORT_FILE;type=text/xml" \
+            -F 'auto_create_context=TRUE' \
+            -F "scan_type=$SCAN_TYPE"
 
       - store_artifacts:  
           path: /zap/wrk/api-scan-report.html
@@ -389,7 +563,7 @@ jobs:
   # Configura a análise do código de infraestrutura (terraform) usando checkov
   test_iac_scan:
     environment:
-      APP_NAME: "juice-shop"
+      APP_NAME: "Juice-shop 2"
       DEFECT_DOJO_API_URL: "https://defectdojo.soulsec.net/api/v2/import-scan/"
       SCAN_TYPE: "Checkov Scan"
       REPORT_FILE: "checkov/results_json.json"
@@ -407,6 +581,25 @@ jobs:
           name: Scan Terraform with Checkov
           command: |
             checkov -d ./terraform --framework terraform --soft-fail -o cli -o json --output-file-path console,$REPORT_FILE
+
+      - run:
+          name: Upload Checkov results to DefectDojo
+          command: |
+            curl -X 'POST' $DEFECT_DOJO_API_URL \
+            -H 'accept: application/json' \
+            -H "Authorization: $DEFECTDOJO_API_TOKEN" \
+            -H 'Content-Type: multipart/form-data' \
+            -F 'active=true' \
+            -F 'verified=false' \
+            -F "engagement_name=$CIRCLE_PROJECT_REPONAME/$CIRCLE_BRANCH" \
+            -F 'deduplication_on_engagement=true' \
+            -F 'minimum_severity=Info' \
+            -F "scan_date=$(date +%Y-%m-%d)" \
+            -F "product_name=$APP_NAME" \
+            -F "file=@$REPORT_FILE;type=text/xml" \
+            -F 'auto_create_context=TRUE' \
+            -F "scan_type=$SCAN_TYPE"
+
 
 workflows:
 
