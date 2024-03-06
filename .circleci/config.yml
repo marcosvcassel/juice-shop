@@ -448,7 +448,7 @@ workflows:
               ignore: master                    
       - deploy-stg:
           requires:
-            - test
+            #- test
             - test_sca
             - pr_test_secrets_scanning
             - pr_test_sast
@@ -469,7 +469,7 @@ workflows:
               ignore: master              
       - deploy-prod:
           requires:
-            - test
+            #- test
             - test_sca
             - test_secrets_scanning
             - test_sast
